@@ -40,8 +40,8 @@ This project provisions a complete Azure infrastructure using Terraform with a m
 ### Usage
 
 1. Clone the repository:
-git clone https://github.com/KajalSund/Terraform_Project.git
-cd Terraform_Project
+git clone https://github.com/Donchka/Terraform_Ansible_Project.git
+cd Terraform_Ansible_Project/assignment1-n01729752
 
 2. Initialize Terraform:
 terraform init
