@@ -1,0 +1,15 @@
+---
+# vars file for user-n01729752
+user_list:
+  - user100
+  - user200
+  - user300
+
+create_group: cloudadmins
+additional_groups:
+  - wheel
+  - cloudadmins
+
+ssh_key_dir: ".ssh"
+ssh_key_type: rsa
+ssh_key_bits: 2048

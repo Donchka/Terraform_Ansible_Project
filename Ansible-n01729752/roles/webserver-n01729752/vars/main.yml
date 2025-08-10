@@ -1,0 +1,8 @@
+---
+# vars file for webserver-n01729752
+apache_index: index.html
+web_root_directory: /var/www/html
+fqdn_file:
+  n01729752-c-vm1: ansible-c-vm1.html
+  n01729752-c-vm2: ansible-c-vm2.html
+  n01729752-c-vm3: ansible-c-vm3.html

@@ -1,0 +1,12 @@
+---
+# handlers file for webserver-n01729752
+- name: restart apache
+  service:
+    name: httpd
+    state: restarted
+
+- name: start apache
+  service:
+    name: httpd
+    state: started
+    enabled: true

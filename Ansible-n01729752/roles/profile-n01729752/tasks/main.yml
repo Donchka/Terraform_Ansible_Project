@@ -1,0 +1,10 @@
+---
+# tasks file for profile-n01729752
+- name: Set TMOUT in /etc/profile
+  blockinfile:
+    path: /etc/profile
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - TMOUT setting for {{ username }}"
+    block: |
+      #Test block added by Ansible……{{ username }}
+      export TMOUT={{ tmout_value }}
+  become: yes

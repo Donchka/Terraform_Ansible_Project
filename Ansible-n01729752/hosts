@@ -1,0 +1,28 @@
+[linux]
+ansible-c-vm1 ansible_host=n01729752-c-vm1.eastus.cloudapp.azure.com
+ansible-c-vm2 ansible_host=n01729752-c-vm2.eastus.cloudapp.azure.com
+ansible-c-vm3 ansible_host=n01729752-c-vm3.eastus.cloudapp.azure.com
+
+[windows]
+ansible-w-vm1 ansible_host=n01729752-w-vm1.eastus.cloudapp.azure.com
+
+[os:children]
+linux
+windows
+
+[windows:vars]
+ansible_user = adminuser
+ansible_password = P@$$w0rd1234!
+ansible_connection = winrm
+ansible_port = 5985
+ansible_winrm_transport = ntlm
+ansible_winrm_server_cert_validation = ignore
+ansible_become = false
+
+[all:vars]
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+
+[linux:vars]
+ansible_user = azureuser
+ansible_ssh_private_key_file = ~/.ssh/id_rsa
+ansible_become = true

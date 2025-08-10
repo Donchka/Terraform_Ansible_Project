@@ -1,0 +1,12 @@
+---
+# vars file for datadisk-n01729752
+data_disk: /dev/sdc
+
+part1_size: 4
+part2_size: 5
+
+part1_fs: xfs
+part2_fs: ext4
+
+part1_mount: /part1
+part2_mount: /part2

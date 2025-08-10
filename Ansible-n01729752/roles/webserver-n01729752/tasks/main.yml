@@ -1,0 +1,23 @@
+---
+# tasks file for webserver-n01729752
+- name: Install Apache web server
+  package:
+    name: httpd
+    state: present
+  notify: start apache
+
+- name: Determine current hostname
+  command: hostname -s
+  register: short_hostname
+  changed_when: false
+
+- name: Set hostname fact
+  set_fact:
+    host_key: "{{ short_hostname.stdout }}"
+
+- name: Copy correct index.html to web root
+  copy:
+    src: "{{ fqdn_file[host_key] }}"
+    dest: "{{ web_root_directory }}/{{ apache_index }}"
+    mode: '0444'
+  notify: restart apache

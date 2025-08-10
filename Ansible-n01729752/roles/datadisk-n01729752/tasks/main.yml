@@ -1,0 +1,67 @@
+---
+# tasks file for datadisk-n01729752
+- name: Ensure parted package is installed
+  package:
+    name: parted
+    state: present
+
+- name: Create GPT partition table on {{ data_disk }}
+  command: parted {{ data_disk }} --script mklabel gpt
+  become: yes
+
+- name: Create partition 1 ({{ part1_size }}GB)
+  parted:
+    device: "{{ data_disk }}"
+    number: 1
+    state: present
+    part_type: primary
+    part_start: 0%
+    part_end: 40%
+
+- name: Create partition 2 ({{ part2_size }}GB)
+  parted:
+    device: "{{ data_disk }}"
+    number: 2
+    state: present
+    part_type: primary
+    part_start: 40%
+    part_end: 90%
+
+- name: Wait for partition devices to appear
+  wait_for:
+    path: "{{ data_disk }}{{ 'p1' if data_disk[-1].isdigit() else '1' }}"
+    timeout: 30
+
+- name: Format partition 1 with {{ part1_fs }}
+  filesystem:
+    fstype: "{{ part1_fs }}"
+    dev: "{{ data_disk }}{{ 'p1' if data_disk[-1].isdigit() else '1' }}"
+
+- name: Format partition 2 with {{ part2_fs }}
+  filesystem:
+    fstype: "{{ part2_fs }}"
+    dev: "{{ data_disk }}{{ 'p2' if data_disk[-1].isdigit() else '2' }}"
+
+- name: Create mount point {{ part1_mount }}
+  file:
+    path: "{{ part1_mount }}"
+    state: directory
+
+- name: Create mount point {{ part2_mount }}
+  file:
+    path: "{{ part2_mount }}"
+    state: directory
+
+- name: Mount partition 1 persistently on {{ part1_mount }}
+  mount:
+    path: "{{ part1_mount }}"
+    src: "{{ data_disk }}{{ 'p1' if data_disk[-1].isdigit() else '1' }}"
+    fstype: "{{ part1_fs }}"
+    state: mounted
+
+- name: Mount partition 2 persistently on {{ part2_mount }}
+  mount:
+    path: "{{ part2_mount }}"
+    src: "{{ data_disk }}{{ 'p2' if data_disk[-1].isdigit() else '2' }}"
+    fstype: "{{ part2_fs }}"
+    state: mounted

@@ -1,0 +1,117 @@
+---
+# tasks file for user-n01729752
+- name: Create group "{{ create_group }}"
+  group:
+    name: "{{ create_group }}"
+    state: present
+
+- name: Create users and add to groups in the list
+  user:
+    name: "{{ item }}"
+    groups: "{{ additional_groups | join(',') }}"
+    append: yes
+    state: present
+    create_home: yes
+  loop: "{{ user_list }}"
+
+- name: Ensure home directory permissions are correct
+  file:
+    path: "/home/{{ item }}"
+    state: directory
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: '0755'
+  loop: "{{ user_list }}"
+
+# - name: Remove existing SSH key pair for each user
+#   file:
+#     path: "/home/{{ item }}/.ssh/id_{{ ssh_key_type }}"
+#     state: absent
+#   loop: "{{ user_list }}"
+
+# - name: Remove existing SSH public key pair for each user
+#   file:
+#     path: "/home/{{ item }}/.ssh/id_{{ ssh_key_type }}.pub"
+#     state: absent
+#   loop: "{{ user_list }}"
+
+- name: Ensure .ssh directory exists for each user
+  file:
+    path: "/home/{{ item }}/.ssh"
+    state: directory
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: '0700'
+  loop: "{{ user_list }}"
+
+- name: Ensure remote_tmp directory exists with correct permissions
+  file:
+    path: "/home/{{ item }}/.ansible/tmp"
+    state: directory
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: "0700"
+  loop: "{{ user_list }}"
+
+- name: Generate SSH key pair for each user
+  become: true
+  become_user: "{{ item }}"
+  command: >
+    ssh-keygen -t {{ ssh_key_type }}
+    -b {{ ssh_key_bits }}
+    -f /home/{{ item }}/{{ ssh_key_dir }}/id_{{ ssh_key_type }}
+    -N ""
+    creates=/home/{{ item }}/{{ ssh_key_dir }}/id_{{ ssh_key_type }}
+  loop: "{{ user_list }}"
+
+- name: Add id_rsa.pub to authorized_keys for each user
+  become: true
+  shell: |
+    cat /home/{{ item }}/{{ ssh_key_dir }}/id_{{ ssh_key_type }}.pub >> /home/{{ item }}/.ssh/authorized_keys
+    chown {{ item }}:{{ item }} /home/{{ item }}/.ssh/authorized_keys
+    chmod 600 /home/{{ item }}/.ssh/authorized_keys
+  args:
+    executable: /bin/bash
+  loop: "{{ user_list }}"
+
+- name: Ensure correct permissions on SSH directory
+  file:
+    path: "/home/{{ item }}/{{ ssh_key_dir }}"
+    state: directory
+    mode: '0700'
+    owner: "{{ item }}"
+    group: "{{ item }}"
+  loop: "{{ user_list }}"
+
+- name: Set correct permissions on private key files
+  file:
+    path: "/home/{{ item }}/{{ ssh_key_dir }}/id_{{ ssh_key_type }}"
+    state: file
+    mode: '0600'
+    owner: "{{ item }}"
+    group: "{{ item }}"
+  loop: "{{ user_list }}"
+
+- name: Set correct permissions on public key files
+  file:
+    path: "/home/{{ item }}/{{ ssh_key_dir }}/id_{{ ssh_key_type }}.pub"
+    state: file
+    mode: '0644'
+    owner: "{{ item }}"
+    group: "{{ item }}"
+  loop: "{{ user_list }}"
+  
+- name: Download user100 private key
+  fetch:
+    src: /home/user100/.ssh/id_rsa
+    dest: ./user100_private_keys/
+    flat: yes
+  become: true
+  when: inventory_hostname == "ansible-c-vm1"
+
+- name: Ensure private key has correct permissions on local machine
+  file:
+    path: "./user100_private_keys/id_rsa"
+    mode: '0600'
+  delegate_to: localhost
+  become: false
