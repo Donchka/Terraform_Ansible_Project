@@ -14,6 +14,7 @@ This project provisions a complete Azure infrastructure using Terraform with a m
 - Provisioners to display hostnames after VM creation
 - Outputs for all critical resources
 - 100% non-interactive and reproducible provisioning
+- Defined Ansible playbook and roles to configure provisioned VMs
 
 ## Resources Created
 
